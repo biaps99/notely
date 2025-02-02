@@ -1,0 +1,24 @@
+[project]
+name = "backend"
+version = "0.1.0"
+description = "A notes app backend"
+readme = "README.md"
+requires-python = ">=3.12"
+
+[dependency-groups]
+static = ["isort", "ruff"]
+test = [
+    "asgi-lifespan>=2.1.0",
+    "pytest>=8.3.4",
+    "pytest-asyncio>=0.25.1",
+]
+dev = []
+prod = [
+    "fastapi[standard]>=0.115.6",
+    "pydantic-settings>=2.7.0",
+    "pydantic>=2.10.4",
+    "uvicorn>=0.34.0",
+    "greenlet>=3.1.1",
+    "tenacity>=9.0.0",
+    "motor>=3.6.0",
+]

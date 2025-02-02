@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {
+    "types": ["jest", "node", "@testing-library/jest-dom"],
+    "esModuleInterop": true
+  }
+}

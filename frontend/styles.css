@@ -1,0 +1,301 @@
+/* Global Styles */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-size: 16px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-sizing: border-box;
+  background-color: #fafafa;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+/* Root Container */
+.root {
+  display: flex;
+  height: 100%;
+  background-color: #f7f7f7;
+  justify-content: flex-start;
+}
+
+/* Sidebar Styles */
+.sidebar {
+  flex-shrink: 0;
+  width: 320px;
+  padding: 1.25em 1em;
+  border-right: 1px solid #e0e0e0;
+  background-color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-radius: 12px 0 0 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.3s ease;
+}
+
+/* Add Folder Button */
+.sidebar__add_folder {
+  background: linear-gradient(135deg, #00a859, #00d3b2);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  cursor: pointer;
+  padding: 0.8em 1.5em;
+  margin-bottom: 1.5em;
+  font-size: 1rem;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.2s ease;
+  align-self: center; /* Center align the button */
+}
+
+.sidebar__add_folder:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #00c3b5, #00a859);
+}
+
+.sidebar__add_folder:active {
+  background: linear-gradient(135deg, #00b388, #008e72);
+}
+
+/* Folder Header */
+.sidebar__folder_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75em 1em;
+  margin-top: 1.25em;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.sidebar__folder_header:hover {
+  background-color: #f1f1f1;
+  color: #00a859;
+}
+
+/* Folder Name */
+.sidebar__folder_name {
+  flex-grow: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 400;
+  padding: 0.2em;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+/* Collapse Button */
+.sidebar__folder_collapse {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 1.5rem;
+  padding: 0.3em;
+  margin-left: 0.5em;
+  transition: color 0.3s ease;
+}
+
+.sidebar__folder_collapse:hover {
+  color: #00a859;
+}
+
+/* Options Button */
+.sidebar__folder_options_button {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0.25em 0.5em;
+  margin-left: 0.5em;
+  position: static;
+  transition:
+    color 0.3s ease,
+    transform 0.2s ease;
+}
+
+.sidebar__folder_options_button:hover {
+  color: #00a859;
+  transform: scale(1.1);
+}
+
+/* Dropdown Menu */
+.sidebar__folder_dropdown_menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  display: none;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  z-index: 1000;
+  min-width: 180px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.sidebar__folder_dropdown_option {
+  padding: 0.75em 1em;
+  font-size: 0.875rem;
+  color: #333;
+  cursor: pointer;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+.sidebar__folder_dropdown_option:hover {
+  background-color: #f1f1f1;
+  color: #00a859;
+}
+
+/* Editable Inputs */
+.sidebar__folder_name_input,
+.sidebar__note_title_input {
+  width: 70%;
+  padding: 0.5em 0.8em;
+  font-size: 0.9rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background-color: #f7f7f7;
+  color: #333;
+  outline: none;
+  transition:
+    border 0.3s ease,
+    box-shadow 0.3s ease;
+  margin-bottom: 1em; /* Added margin-bottom for spacing */
+}
+
+.sidebar__folder_name_input:focus-visible,
+.sidebar__note_title_input:focus-visible {
+  border-color: #00a859;
+  box-shadow: 0 0 6px rgba(0, 168, 89, 0.4);
+}
+
+/* Note Item */
+.sidebar__note_item {
+  display: flex;
+  flex-direction: row;
+  padding: 0.8em 1.2em;
+  margin-left: 20px;
+  margin-bottom: 1.5em;
+  border-radius: 8px;
+  background-color: #ffffff;
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease;
+  cursor: pointer;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.sidebar__note_item:hover {
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar__note_item--selected {
+  background-color: #e8f1fc;
+  border-left: 4px solid #00a859;
+}
+
+/* Note Details */
+.sidebar__note_details {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+/* Note Title */
+.sidebar__note_title {
+  font-size: 1rem;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  margin-bottom: 0.5em;
+  color: #333;
+}
+
+/* Note Last Updated At */
+.sidebar__note_last_updated_at {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+/* Delete Button */
+.sidebar__delete_note {
+  background: transparent;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  font-size: 1.25rem;
+  padding: 0.2em;
+  margin-left: 0.1em;
+  transition: color 0.3s ease;
+}
+
+.sidebar__delete_note:hover {
+  color: #ff4d4d;
+  transform: scale(1.1);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 280px;
+    padding: 1em;
+  }
+
+  .sidebar__add_folder {
+    font-size: 0.875rem;
+    padding: 0.5em 1em;
+  }
+
+  .sidebar__folder_header {
+    font-size: 0.875rem;
+  }
+
+  .sidebar__note_item {
+    margin-left: 10px;
+    padding: 0.6em 0.8em;
+  }
+
+  .sidebar__folder_name_input,
+  .sidebar__note_title_input {
+    font-size: 0.75rem;
+    padding: 0.25em 0.5em;
+  }
+
+  .sidebar__folder_name,
+  .sidebar__note_title {
+    font-size: 0.75rem;
+    padding: 0.25em 0.5em;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,14 @@
+{
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/backend"
+    ],
+    "python.envFile": "${workspaceFolder}/.env",
+    "python.terminal.activateEnvironment": true,
+    "python.defaultInterpreterPath": "${workspaceFolder}/backend/.venv/bin/python",
+    "python.testing.pytestEnabled": true,
+    "python.testing.cwd": "${workspaceFolder}/backend/tests",
+    "python.testing.pytestPath": "${workspaceFolder}/backend/.venv/bin/pytest",
+    "search.exclude": {
+        "**/*.code-search": false
+    },
+}

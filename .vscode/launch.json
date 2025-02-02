@@ -1,0 +1,44 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Backend Debugger",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "uvicorn",
+            "args": [
+                "main:app",
+                "--reload",
+                "--port",
+                "8000",
+            ],
+            "cwd": "${workspaceFolder}/backend",
+            "jinja": false,
+        },
+        {
+            "name": "Frontend Tests Debugger",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/frontend/node_modules/jest/bin/jest.js",
+            "args": [
+                "--runInBand",
+                "-t",
+                "adds a new folder when"
+            ],
+            "cwd": "${workspaceFolder}/frontend",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
+        },
+        {
+            "name": "Frontend Debugger",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}/frontend",
+            "sourceMaps": true,
+            "skipFiles": ["node_modules/**/*.js"],
+            "trace": true
+        }
+        
+    ]
+}

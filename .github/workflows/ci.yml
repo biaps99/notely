@@ -1,0 +1,94 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  backend-lint:
+    name: Run isort and ruff (Backend Lint)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: backend/pyproject.toml
+
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Install static-analysis dependencies with uv
+        run: uv sync --frozen --group static
+
+      - name: Run isort and ruff
+        run: make format
+
+  backend-tests:
+    name: Run Backend Tests
+    runs-on: ubuntu-latest
+    needs: backend-lint
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: backend/pyproject.toml
+
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Install test dependencies with uv
+        run: cd backend && uv sync --frozen --group test --group prod
+
+      - name: Run backend tests
+        run: make test_be
+
+  frontend-lint:
+    name: Run yarn format (Frontend Lint)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install linting frontend dependencies
+        run: cd frontend && yarn install --production=false
+
+      - name: Run frontend format
+        run: make format_fe
+
+  frontend-tests:
+    name: Run Frontend Tests
+    runs-on: ubuntu-latest
+    needs: frontend-lint
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install test frontend dependencies
+        run: cd frontend && yarn install
+
+      - name: Run frontend tests
+        run: make test_fe
