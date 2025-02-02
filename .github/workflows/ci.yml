@@ -8,9 +8,13 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ci-pipeline-${{github.ref}}
+  cancel-in-progress: true
+
 jobs:
   backend-lint:
-    name: Run isort and ruff (Backend Lint)
+    name: Run Backend Lint
     runs-on: ubuntu-latest
 
     steps:
@@ -22,40 +26,61 @@ jobs:
         with:
           python-version-file: backend/pyproject.toml
 
-      - name: Install uv
-        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      - name: Install UV
+        uses: astral-sh/setup-uv@v5
+        with:
+            version: latest
 
-      - name: Install static-analysis dependencies with uv
-        run: uv sync --frozen --group static
+      - name: Install lint backend dependencies
+        run: |
+            cd backend
+            uv sync --frozen --no-install-project --group lint
 
-      - name: Run isort and ruff
-        run: make format
+      - name: Run backend format check
+        run: |
+            cd backend
+            uv run ruff format --diff .
+            uv run ruff check .
 
   backend-tests:
     name: Run Backend Tests
     runs-on: ubuntu-latest
     needs: backend-lint
+    continue-on-error: false
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+        - name: Checkout repository
+          uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version-file: backend/pyproject.toml
+        - name: Set up Python
+          uses: actions/setup-python@v5
+          with:
+            python-version-file: backend/pyproject.toml
 
-      - name: Install uv
-        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+        - name: Install UV
+          uses: astral-sh/setup-uv@v5
+          with:
+            version: latest
 
-      - name: Install test dependencies with uv
-        run: cd backend && uv sync --frozen --group test --group prod
+        - name: Install test dependencies
+          run: |
+            cd backend
+            uv sync --frozen --no-install-project --group test --group prod
+        
+        - name: Start mongodb
+          uses: supercharge/mongodb-github-action@1.12.0
+          with:
+            mongodb-replica-set: rs0
 
-      - name: Run backend tests
-        run: make test_be
-
+        - name: Run backend tests with coverage
+          run: | 
+            cd backend
+            export PYTHONPATH=$(pwd)
+            export ENVIRONMENT=testing
+            uv run pytest --cov=backend --cov-report=term-missing --maxfail=1 -vv
+        
   frontend-lint:
-    name: Run yarn format (Frontend Lint)
+    name: Run Frontend Lint
     runs-on: ubuntu-latest
 
     steps:
@@ -64,14 +89,16 @@ jobs:
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
-        with:
-          node-version: 18
 
-      - name: Install linting frontend dependencies
-        run: cd frontend && yarn install --production=false
+      - name: Install lint frontend dependencies
+        run: |
+            cd frontend
+            yarn install --production=false --frozen-lockfile
 
-      - name: Run frontend format
-        run: make format_fe
+      - name: Run frontend format check
+        run: |
+            cd frontend
+            yarn format --check
 
   frontend-tests:
     name: Run Frontend Tests
@@ -84,11 +111,13 @@ jobs:
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
-        with:
-          node-version: 18
 
       - name: Install test frontend dependencies
-        run: cd frontend && yarn install
+        run: |
+            cd frontend
+            yarn install --frozen-lockfile
 
-      - name: Run frontend tests
-        run: make test_fe
+      - name: Run frontend tests with coverage
+        run: |
+            cd frontend 
+            yarn test --coverage --watchAll=false

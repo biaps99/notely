@@ -1,8 +1,9 @@
 from typing import TYPE_CHECKING
 
+from fastapi import APIRouter, Depends
+
 from core import constants, schemas, services
 from database import get_session
-from fastapi import APIRouter, Depends
 
 if TYPE_CHECKING:
     from database import Session

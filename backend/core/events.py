@@ -5,6 +5,7 @@ if TYPE_CHECKING:
     from typing import Any
 
     from bson import ObjectId
+
     from enums import EventType
 
 

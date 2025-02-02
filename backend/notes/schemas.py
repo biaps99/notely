@@ -1,7 +1,8 @@
 from typing import Optional
 
-from core.schemas import StrObjectId
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
+
+from core.schemas import StrObjectId
 
 
 class NoteCreate(BaseModel):

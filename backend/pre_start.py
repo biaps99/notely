@@ -1,8 +1,9 @@
 import asyncio
 import logging
 
-import database
 from tenacity import after_log, before_log, retry, stop_after_attempt, wait_fixed
+
+import database
 
 logger = logging.getLogger(__name__)
 

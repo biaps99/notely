@@ -1,8 +1,9 @@
 from typing import TYPE_CHECKING
 
-from __version__ import __version__
 from motor import motor_asyncio
 from pymongo.driver_info import DriverInfo
+
+from __version__ import __version__
 from settings import settings
 
 if TYPE_CHECKING:

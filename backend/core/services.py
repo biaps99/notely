@@ -3,8 +3,9 @@ from typing import TYPE_CHECKING
 from core.utils import get_now_utc
 
 if TYPE_CHECKING:
-    from database import Session
     from events import Event
+
+    from database import Session
 
 
 async def get_events(session: "Session") -> "list[Event]":

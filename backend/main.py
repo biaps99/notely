@@ -3,12 +3,13 @@ import sys
 from contextlib import asynccontextmanager
 
 import uvicorn
-from __version__ import __version__
-from core.routes import router as core_router
-from database import close_connection
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
+
+from __version__ import __version__
+from core.routes import router as core_router
+from database import close_connection
 from folders.routes import router as folder_router
 from notes.routes import router as note_router
 from settings import settings

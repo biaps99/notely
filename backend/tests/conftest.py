@@ -1,10 +1,11 @@
 from typing import TYPE_CHECKING
-
+import pytest_asyncio
 import pytest
-from database import get_client
 from httpx import ASGITransport, AsyncClient
-from main import app
 from pytest_asyncio import is_async_test
+
+from database import get_client
+from main import app
 
 if TYPE_CHECKING:
     from typing import AsyncGenerator
@@ -21,7 +22,7 @@ def pytest_collection_modifyitems(items):
 
 
 # TODO: Improve. We should not need to drop all collections after each test, just the objects created by the test.
-@pytest.fixture(autouse=True)
+@pytest_asyncio.fixture(autouse=True)
 async def cleanup(session: "Session"):
     db = session.client.db
     async with session.start_transaction():
@@ -29,13 +30,13 @@ async def cleanup(session: "Session"):
             await db[collection].delete_many({}, session=session)
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def session() -> "AsyncGenerator[Session, None]":
     async with await get_client().start_session() as session:
         yield session
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def client() -> "AsyncGenerator[AsyncClient, None]":
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"

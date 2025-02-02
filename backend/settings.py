@@ -2,8 +2,9 @@ import logging
 import os
 
 from dotenv import load_dotenv
-from enums import Environment
 from pydantic_settings import BaseSettings
+
+from enums import Environment
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +34,7 @@ class DevelopmentSettings(Settings):
 
 class TestSettings(Settings):
     DATABASE_NAME: str = "testing"
-    MONGODB_CONNECTION_STRING: str = f"mongodb://localhost:27017/{DATABASE_NAME}"
+    MONGODB_CONNECTION_STRING: str = f"mongodb://0.0.0.0:27017/{DATABASE_NAME}"
 
 
 def get_settings() -> Settings:

@@ -2,6 +2,7 @@ import copy
 import typing
 
 from bson import ObjectId
+
 from core.enums import FolderEventType
 from core.events import Event
 from core.services import create_event

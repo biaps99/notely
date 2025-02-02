@@ -1,7 +1,8 @@
 from typing import TYPE_CHECKING
 
-from database import get_session
 from fastapi import APIRouter, Body, Depends, Query, status
+
+from database import get_session
 from folders import constants, schemas, services
 
 if TYPE_CHECKING:

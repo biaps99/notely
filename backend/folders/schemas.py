@@ -1,5 +1,6 @@
-from core.schemas import StrObjectId
 from pydantic import BaseModel, ConfigDict, Field
+
+from core.schemas import StrObjectId
 
 
 class FolderRetrieve(BaseModel):
