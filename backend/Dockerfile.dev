@@ -1,0 +1,22 @@
+# Use a Python image with uv pre-installed
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+
+WORKDIR /app/backend
+
+ENV UV_COMPILE_BYTECODE=1 
+ENV UV_LINK_MODE=copy
+ENV PYTHONUNBUFFERED=1 
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV ENVIRONMENT=development
+
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --frozen --no-install-project --group prod --group dev --group lint --group test
+
+ADD . /app/backend
+
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --group prod --group dev --group lint --group test
+
+ENV PATH="/app/backend/.venv/bin:$PATH"

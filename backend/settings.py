@@ -13,12 +13,9 @@ load_dotenv()
 
 class Settings(BaseSettings):
     ROOT_DIR_NAME: str = os.path.basename(os.path.abspath(os.curdir))
-    MONGODB_CONNECTION_STRING: str = "mongodb://localhost:27017"
     DEBUG: bool = False
     RELOAD: bool = False
-    ALLOWED_ORIGINS: list[str] = [
-        "http://localhost:3000",
-    ]
+    ALLOWED_ORIGINS: list[str] = []
 
     class Config:
         env_file = ".env"
@@ -26,10 +23,13 @@ class Settings(BaseSettings):
 
 class DevelopmentSettings(Settings):
     DATABASE_NAME: str = "development"
-    MONGODB_CONNECTION_STRING: str = f"mongodb://localhost:27017/{DATABASE_NAME}"
     RELOAD: bool = True
-    HOST: str = "localhost"
-    PORT: int = 8000
+    MONGODB_CONNECTION_STRING: str = os.getenv(
+        "MONGODB_CONNECTION_STRING", f"mongodb://localhost:27017/{DATABASE_NAME}"
+    )
+    HOST: str = os.getenv("HOST", "localhost")
+    PORT: int = os.getenv("PORT", 8000)
+    ALLOWED_ORIGINS: list[str] = os.getenv("ALLOWED_ORIGINS", ["http://localhost:3000"])
 
 
 class TestSettings(Settings):

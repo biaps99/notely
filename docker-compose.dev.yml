@@ -1,0 +1,70 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8000:8000"
+  #  depends_on:
+  #    - mongo
+    command: uv run main.py
+    environment:
+      - MONGODB_CONNECTION_STRING=mongodb://mongo:27017/development
+      - HOST=0.0.0.0
+      - ALLOWED_ORIGINS=["http://localhost:3000"]
+    develop:
+      watch:
+        - action: sync
+          path: ./backend
+          target: /app/backend
+          ignore:
+            - ./backend/.venv/
+        - action: rebuild
+          path: ./uv.lock
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    command: yarn dev
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend
+          target: /app/frontend
+          ignore:
+            - ./frontend/node_modules/
+        - action: rebuild
+          path: ./frontend/yarn.lock
+
+
+  # MongoDB service without a replica set
+  # mongo:
+#   restart: unless-stopped
+#   image: mongo:latest
+#   ports:
+#     - 27017:27017
+#   volumes:
+#     - mongodb_data:/data/db
+#     - mongodb_config:/data/configdb
+#   healthcheck:
+#     test: ["CMD", "mongosh", db.adminCommand('ping')]
+#     interval: 2s
+#     retries: 5
+#     start_period: 5s
+
+
+  # TODO: Add a MongoDB service with a replica set. Not able to make it work with docker-compose.
+  # With docker run, it works fine: # https://www.mongodb.com/resources/products/compatibilities/deploying-a-mongodb-cluster-with-docker
+  # docker run -d --rm -p 27017:27017 --network notely_default --name mongo mongo:5 mongod --replSet myReplicaSet --bind_ip localhost,mongo
+  # docker exec -it mongo mongosh
+  # rs.initiate()
+  # rs.status()
+    
+volumes:
+  mongodb_data:
+  mongodb_config:

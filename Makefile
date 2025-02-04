@@ -29,3 +29,9 @@ run_be:
 
 run_fe:
 	cd frontend && yarn dev
+
+build_dev:
+	docker-compose -f docker-compose.dev.yml build backend frontend mongo --no-cache
+
+run_dev:
+	docker-compose -f docker-compose.dev.yml up backend frontend mongo

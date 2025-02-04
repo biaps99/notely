@@ -1,0 +1,11 @@
+FROM node:18-bullseye
+
+WORKDIR /app/frontend
+
+COPY package.json yarn.lock ./
+
+RUN yarn install --frozen-lockfile
+
+ADD . /app/frontend/
+
+ENV PATH="/app/frontend/node_modules/.bin:$PATH"
