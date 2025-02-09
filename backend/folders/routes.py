@@ -4,9 +4,11 @@ from fastapi import APIRouter, Body, Depends, Query, status
 
 from database import get_session
 from folders import constants, schemas, services
+from core.auth import get_auth_user
 
 if TYPE_CHECKING:
     from database import Session
+    from core.auth import AuthUser
 
 router = APIRouter(prefix=constants.API_PREFIX)
 
@@ -20,6 +22,7 @@ router = APIRouter(prefix=constants.API_PREFIX)
 async def create_folder(
     folder: "schemas.FolderCreate" = Body(...),
     session: "Session" = Depends(get_session),
+    auth_user: "AuthUser" = Depends(get_auth_user),
 ) -> "schemas.FolderRetrieve":
     return await session.with_transaction(
         lambda s: services.create_folder(folder.model_dump(), s)
@@ -35,6 +38,7 @@ async def get_folders(
     limit: int = Query(20, ge=1),
     offset: int = Query(0, ge=0),
     session: "Session" = Depends(get_session),
+    auth_user: "AuthUser" = Depends(get_auth_user),
 ) -> "list[schemas.FolderRetrieve]":
     return await services.get_folders(session, limit, offset)
 
@@ -44,6 +48,7 @@ async def update_folder(
     folder_id: str,
     folder: "schemas.FolderUpdate" = Body(...),
     session: "Session" = Depends(get_session),
+    auth_user: "AuthUser" = Depends(get_auth_user),
 ) -> None:
     return await session.with_transaction(
         lambda s: services.update_folder(
@@ -60,5 +65,6 @@ async def update_folder(
 async def delete_folder(
     folder_id: str,
     session: "Session" = Depends(get_session),
+    auth_user: "AuthUser" = Depends(get_auth_user),
 ) -> None:
     await session.with_transaction(lambda s: services.delete_folder(folder_id, s))

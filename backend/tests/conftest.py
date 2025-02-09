@@ -3,7 +3,7 @@ import pytest_asyncio
 import pytest
 from httpx import ASGITransport, AsyncClient
 from pytest_asyncio import is_async_test
-
+from core.auth import get_auth_user, AuthUser
 from database import get_client
 from main import app
 
@@ -41,4 +41,7 @@ async def client() -> "AsyncGenerator[AsyncClient, None]":
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
     ) as ac:
+        app.dependency_overrides[get_auth_user] = lambda: AuthUser(
+            name="test_name", email="test_email", user_id="test_id"
+        )
         yield ac

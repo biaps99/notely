@@ -1,0 +1,30 @@
+/* Global Styles */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-size: 16px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-sizing: border-box;
+  background-color: #fafafa;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+/* Root Container */
+.root {
+  display: flex;
+  height: 100%;
+  background-color: #f7f7f7;
+  justify-content: flex-start;
+}
+
+/* Content Wrapper */
+.content-wrapper {
+  width: 100%;
+  text-align: center;
+}

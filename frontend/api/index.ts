@@ -1,68 +1,24 @@
-import axios, { AxiosResponse } from 'axios';
-import * as types from './types';
-import * as constants from './constants';
+import { AxiosResponse } from 'axios';
+import * as types from '../types';
 
-const OkMessage = {
-  data: [],
-  status: 200,
-  statusText: 'OK',
+type Api = {
+  get: (url: string) => Promise<AxiosResponse>;
+  put: (url: string, data: any) => Promise<AxiosResponse>;
+  post: (url: string, data: any) => Promise<AxiosResponse>;
+  delete: (url: string) => Promise<AxiosResponse>;
 };
 
-const fakeApi = {
-  /**
-   * Simulates a GET request to an API.
-   * @param url - The URL to request.
-   * @returns A promise that resolves with a mock API response.
-   */
-  get(url: string): Promise<AxiosResponse<any>> {
-    return new Promise((resolve) => {
-      resolve(OkMessage);
-    });
-  },
+let api: Api;
 
-  /**
-   * Simulates a PUT request to an API.
-   * @param url - The URL to request.
-   * @param data - The data to send in the request body.
-   * @returns A promise that resolves with a mock API response.
-   */
-  put(url: string, data: any): Promise<AxiosResponse<any>> {
-    return new Promise((resolve) => {
-      resolve(OkMessage);
-    });
-  },
-
-  /**
-   * Simulates a POST request to an API.
-   * @param url - The URL to request.
-   * @param data - The data to send in the request body.
-   * @returns A promise that resolves with a mock API response.
-   */
-  post(url: string, data: any): Promise<AxiosResponse<any>> {
-    return new Promise((resolve) => {
-      resolve(OkMessage);
-    });
-  },
-
-  /**
-   * Simulates a DELETE request to an API.
-   * @param url - The URL to request.
-   * @returns A promise that resolves with a mock API response.
-   */
-  delete(url: string): Promise<AxiosResponse<any>> {
-    return new Promise((resolve) => {
-      resolve(OkMessage);
-    });
-  },
-};
-
-const api =
-  process.env.NODE_ENV === 'test'
-    ? fakeApi
-    : axios.create({
-        baseURL: constants.API_URL,
-        timeout: constants.API_TIMEOUT_IN_MILLISECONDS,
-      });
+if (process.env.NODE_ENV === 'test') {
+  import('./fake').then((module) => {
+    api = module.api;
+  });
+} else {
+  import('./axios').then((module) => {
+    api = module.api;
+  });
+}
 
 /**
  * Fetches a list of folders from the API.
@@ -71,7 +27,7 @@ const api =
  * @returns A promise that resolves with an array of folders.
  * @throws An error if the API request fails.
  */
-export const fetchFolders = async (
+const fetchFolders = async (
   limit: number = 50,
   offset: number = 0
 ): Promise<types.Folder[]> => {
@@ -92,7 +48,7 @@ export const fetchFolders = async (
  * @returns A promise that resolves with the updated folder.
  * @throws An error if the API request fails.
  */
-export const updateFolder = async (
+const updateFolder = async (
   folder: Partial<types.Folder>,
   folderId: string
 ): Promise<types.Folder> => {
@@ -113,9 +69,7 @@ export const updateFolder = async (
  * @returns A promise that resolves with the newly created folder.
  * @throws An error if the API request fails.
  */
-export const createFolder = async (
-  folder: types.Folder
-): Promise<types.Folder> => {
+const createFolder = async (folder: types.Folder): Promise<types.Folder> => {
   try {
     const response: AxiosResponse<types.Folder> = await api.post(
       '/folders',
@@ -133,9 +87,7 @@ export const createFolder = async (
  * @returns A promise that resolves with an array of notes.
  * @throws An error if the API request fails.
  */
-export const fetchFolderNotes = async (
-  folderId: string
-): Promise<types.Note[]> => {
+const fetchFolderNotes = async (folderId: string): Promise<types.Note[]> => {
   try {
     const response: AxiosResponse<types.Note[]> = await api.get(
       `/notes/${folderId}`
@@ -153,7 +105,7 @@ export const fetchFolderNotes = async (
  * @returns A promise that resolves with the updated note.
  * @throws An error if the API request fails.
  */
-export const updateNote = async (
+const updateNote = async (
   note: Partial<types.Note>,
   noteId: string
 ): Promise<types.Note> => {
@@ -174,7 +126,7 @@ export const updateNote = async (
  * @returns A promise that resolves with the deleted note.
  * @throws An error if the API request fails.
  */
-export const deleteNote = async (noteId: string): Promise<types.Note> => {
+const deleteNote = async (noteId: string): Promise<types.Note> => {
   try {
     const response: AxiosResponse<types.Note> = await api.delete(
       `/notes/${noteId}`
@@ -191,9 +143,7 @@ export const deleteNote = async (noteId: string): Promise<types.Note> => {
  * @returns A promise that resolves with the newly created note.
  * @throws An error if the API request fails.
  */
-export const createNote = async (
-  note: Partial<types.Note>
-): Promise<types.Note> => {
+const createNote = async (note: Partial<types.Note>): Promise<types.Note> => {
   try {
     const response: AxiosResponse<types.Note> = await api.post('/notes', note);
     return response.data;
@@ -208,7 +158,7 @@ export const createNote = async (
  * @returns A promise that resolves with the deleted folder.
  * @throws An error if the API request fails.
  */
-export const deleteFolder = async (folderId: string): Promise<types.Folder> => {
+const deleteFolder = async (folderId: string): Promise<types.Folder> => {
   try {
     const response: AxiosResponse<types.Folder> = await api.delete(
       `/folders/${folderId}`
@@ -217,4 +167,15 @@ export const deleteFolder = async (folderId: string): Promise<types.Folder> => {
   } catch (error) {
     throw error;
   }
+};
+
+export {
+  fetchFolders,
+  updateFolder,
+  createFolder,
+  fetchFolderNotes,
+  updateNote,
+  deleteNote,
+  createNote,
+  deleteFolder,
 };

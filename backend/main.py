@@ -9,6 +9,7 @@ from fastapi.responses import RedirectResponse
 
 from __version__ import __version__
 from core.routes import router as core_router
+from core import auth
 from database import close_connection
 from folders.routes import router as folder_router
 from notes.routes import router as note_router
@@ -25,6 +26,7 @@ logging.basicConfig(
 
 @asynccontextmanager
 async def lifespan(app: "FastAPI"):
+    auth.init()
     yield
     await close_connection()
 

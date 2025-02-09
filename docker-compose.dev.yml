@@ -60,8 +60,9 @@ services:
 
   # TODO: Add a MongoDB service with a replica set. Not able to make it work with docker-compose.
   # With docker run, it works fine: # https://www.mongodb.com/resources/products/compatibilities/deploying-a-mongodb-cluster-with-docker
-  # docker run -d --rm -p 27017:27017 --network notely_default --name mongo mongo:5 mongod --replSet myReplicaSet --bind_ip localhost,mongo
+  # docker run -d -p 27017:27017 --network notely_default --name mongo -v mongo_data:/data/db mongo:5 mongod --replSet myReplicaSet --bind_ip localhost,mongo
   # docker exec -it mongo mongosh
+  # use development
   # rs.initiate()
   # rs.status()
     

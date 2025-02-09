@@ -22,4 +22,6 @@ prod = [
     "uvicorn>=0.34.0",
     "greenlet>=3.1.1",
     "motor>=3.6.0",
+    "pyrebase4>=4.8.0",
+    "firebase-admin>=6.6.0",
 ]

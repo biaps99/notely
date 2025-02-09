@@ -4,9 +4,11 @@ from fastapi import APIRouter, Body, Depends, Query, status
 
 from database import get_session
 from notes import constants, schemas, services
+from core.auth import get_auth_user
 
 if TYPE_CHECKING:
     from database import Session
+    from core.auth import AuthUser
 
 router = APIRouter(prefix=constants.API_PREFIX)
 
@@ -18,7 +20,9 @@ router = APIRouter(prefix=constants.API_PREFIX)
     response_model=schemas.NoteRetrieve,
 )
 async def create_note(
-    note: "schemas.NoteCreate" = Body(...), session: "Session" = Depends(get_session)
+    note: "schemas.NoteCreate" = Body(...),
+    session: "Session" = Depends(get_session),
+    auth_user: "AuthUser" = Depends(get_auth_user),
 ) -> "schemas.NoteRetrieve":
     return await session.with_transaction(
         lambda s: services.create_note(note.model_dump(), s)
@@ -32,6 +36,7 @@ async def get_notes(
     limit: int = Query(20, ge=1),
     offset: int = Query(0, ge=0),
     session: "Session" = Depends(get_session),
+    auth_user: "AuthUser" = Depends(get_auth_user),
 ) -> list["schemas.NoteRetrieve"]:
     return await services.get_notes(session, limit, offset)
 
@@ -46,6 +51,7 @@ async def get_folder_notes(
     limit: int = Query(20, ge=1),
     offset: int = Query(0, ge=0),
     session: "Session" = Depends(get_session),
+    auth_user: "AuthUser" = Depends(get_auth_user),
 ) -> list["schemas.NoteRetrieve"]:
     return await services.get_folder_notes(folder_id, session, limit, offset)
 
@@ -57,6 +63,7 @@ async def update_note(
     note_id: str,
     note: "schemas.NoteUpdate" = Body(...),
     session: "Session" = Depends(get_session),
+    auth_user: "AuthUser" = Depends(get_auth_user),
 ) -> "schemas.NoteUpdate":
     return await session.with_transaction(
         lambda s: services.update_note(note_id, note.model_dump(exclude_unset=True), s)
@@ -71,5 +78,6 @@ async def update_note(
 async def delete_note(
     note_id: str,
     session: "Session" = Depends(get_session),
+    auth_user: "AuthUser" = Depends(get_auth_user),
 ) -> None:
     await session.with_transaction(lambda s: services.delete_note(note_id, s))
