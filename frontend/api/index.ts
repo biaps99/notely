@@ -1,5 +1,7 @@
 import { AxiosResponse } from 'axios';
 import * as types from '../types';
+import { api as fakeApi } from './fake';
+import { api as axiosApi } from './axios';
 
 type Api = {
   get: (url: string) => Promise<AxiosResponse>;
@@ -8,17 +10,7 @@ type Api = {
   delete: (url: string) => Promise<AxiosResponse>;
 };
 
-let api: Api;
-
-if (process.env.NODE_ENV === 'test') {
-  import('./fake').then((module) => {
-    api = module.api;
-  });
-} else {
-  import('./axios').then((module) => {
-    api = module.api;
-  });
-}
+const api: Api = process.env.NODE_ENV === 'testing' ? fakeApi : axiosApi;
 
 /**
  * Fetches a list of folders from the API.
@@ -90,7 +82,7 @@ const createFolder = async (folder: types.Folder): Promise<types.Folder> => {
 const fetchFolderNotes = async (folderId: string): Promise<types.Note[]> => {
   try {
     const response: AxiosResponse<types.Note[]> = await api.get(
-      `/notes/${folderId}`
+      `/folders/${folderId}/notes`
     );
     return response.data;
   } catch (error) {
@@ -102,16 +94,18 @@ const fetchFolderNotes = async (folderId: string): Promise<types.Note[]> => {
  * Updates a note's details on the API.
  * @param note - The note data to update.
  * @param noteId - The ID of the note to update.
+ * @param folderId - The ID of the folder that contains the note.
  * @returns A promise that resolves with the updated note.
  * @throws An error if the API request fails.
  */
 const updateNote = async (
   note: Partial<types.Note>,
-  noteId: string
+  noteId: string,
+  folderId: string
 ): Promise<types.Note> => {
   try {
     const response: AxiosResponse<types.Note> = await api.put(
-      `/notes/${noteId}`,
+      `/folders/${folderId}/notes/${noteId}`,
       note
     );
     return response.data;
@@ -123,13 +117,17 @@ const updateNote = async (
 /**
  * Deletes a note from the API.
  * @param noteId - The ID of the note to delete.
+ * @param folderId - The ID of the folder that contains the note.
  * @returns A promise that resolves with the deleted note.
  * @throws An error if the API request fails.
  */
-const deleteNote = async (noteId: string): Promise<types.Note> => {
+const deleteNote = async (
+  noteId: string,
+  folderId: string
+): Promise<types.Note> => {
   try {
     const response: AxiosResponse<types.Note> = await api.delete(
-      `/notes/${noteId}`
+      `/folders/${folderId}/notes/${noteId}`
     );
     return response.data;
   } catch (error) {
@@ -140,12 +138,19 @@ const deleteNote = async (noteId: string): Promise<types.Note> => {
 /**
  * Creates a new note on the API.
  * @param note - The note data to create.
+ * @param folderId - The ID of the folder to add the note to.
  * @returns A promise that resolves with the newly created note.
  * @throws An error if the API request fails.
  */
-const createNote = async (note: Partial<types.Note>): Promise<types.Note> => {
+const createNote = async (
+  note: Partial<types.Note>,
+  folderId: string
+): Promise<types.Note> => {
   try {
-    const response: AxiosResponse<types.Note> = await api.post('/notes', note);
+    const response: AxiosResponse<types.Note> = await api.post(
+      `/folders/${folderId}/notes`,
+      note
+    );
     return response.data;
   } catch (error) {
     throw error;

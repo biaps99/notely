@@ -12,7 +12,6 @@ from core.routes import router as core_router
 from core import auth
 from database import close_connection
 from folders.routes import router as folder_router
-from notes.routes import router as note_router
 from settings import settings
 
 logger = logging.getLogger(__name__)
@@ -42,12 +41,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-for router in [core_router, note_router, folder_router]:
+for router in [core_router, folder_router]:
     app.include_router(router)
 
 
 @app.get("/", include_in_schema=False)
-async def home():
+async def home() -> RedirectResponse:
     return RedirectResponse(url=DOCS_URL)
 
 

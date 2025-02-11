@@ -1,9 +1,10 @@
 from typing import TYPE_CHECKING
 
-from fastapi import APIRouter, Body, Depends, Query, status
+from fastapi import APIRouter, Body, Depends, Query, status, HTTPException
 
 from database import get_session
 from folders import constants, schemas, services
+from notes import schemas as note_schemas, services as note_services
 from core.auth import get_auth_user
 
 if TYPE_CHECKING:
@@ -25,7 +26,7 @@ async def create_folder(
     auth_user: "AuthUser" = Depends(get_auth_user),
 ) -> "schemas.FolderRetrieve":
     return await session.with_transaction(
-        lambda s: services.create_folder(folder.model_dump(), s)
+        lambda s: services.create_folder(auth_user.user_id, folder.model_dump(), s)
     )
 
 
@@ -40,7 +41,7 @@ async def get_folders(
     session: "Session" = Depends(get_session),
     auth_user: "AuthUser" = Depends(get_auth_user),
 ) -> "list[schemas.FolderRetrieve]":
-    return await services.get_folders(session, limit, offset)
+    return await services.get_folders(auth_user.user_id, session, limit, offset)
 
 
 @router.put("/{folder_id}", description="Update a given Folder")
@@ -52,7 +53,7 @@ async def update_folder(
 ) -> None:
     return await session.with_transaction(
         lambda s: services.update_folder(
-            folder_id, folder.model_dump(exclude_unset=True), s
+            auth_user.user_id, folder_id, folder.model_dump(exclude_unset=True), s
         )
     )
 
@@ -67,4 +68,83 @@ async def delete_folder(
     session: "Session" = Depends(get_session),
     auth_user: "AuthUser" = Depends(get_auth_user),
 ) -> None:
-    await session.with_transaction(lambda s: services.delete_folder(folder_id, s))
+    await session.with_transaction(
+        lambda s: services.delete_folder(auth_user.user_id, folder_id, s)
+    )
+
+
+@router.post(
+    "/{folder_id}/notes",
+    description="Create a Note in a given Folder",
+    status_code=status.HTTP_201_CREATED,
+    response_model=note_schemas.NoteRetrieve,
+)
+async def create_note(
+    folder_id: str,
+    note: "note_schemas.NoteCreate" = Body(...),
+    session: "Session" = Depends(get_session),
+    auth_user: "AuthUser" = Depends(get_auth_user),
+) -> "note_schemas.NoteRetrieve":
+    if not await services.get_user_folder(auth_user.user_id, folder_id, session):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
+    return await session.with_transaction(
+        lambda s: note_services.create_note(folder_id, note.model_dump(), s)
+    )
+
+
+@router.get(
+    "/{folder_id}/notes",
+    description="Retrieve all Notes of a given Folder",
+    response_model=list[note_schemas.NoteRetrieve],
+)
+async def get_notes(
+    folder_id: str,
+    limit: int = Query(20, ge=1),
+    offset: int = Query(0, ge=0),
+    session: "Session" = Depends(get_session),
+    auth_user: "AuthUser" = Depends(get_auth_user),
+) -> list["note_schemas.NoteRetrieve"]:
+    if not await services.get_user_folder(auth_user.user_id, folder_id, session):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
+    return await note_services.get_folder_notes(folder_id, session, limit, offset)
+
+
+@router.put(
+    "/{folder_id}/notes/{note_id}",
+    description="Update a given Note in a given Folder",
+    response_model=note_schemas.NoteUpdate,
+)
+async def update_note(
+    folder_id: str,
+    note_id: str,
+    note: "note_schemas.NoteUpdate" = Body(...),
+    session: "Session" = Depends(get_session),
+    auth_user: "AuthUser" = Depends(get_auth_user),
+) -> "note_schemas.NoteUpdate":
+    if not await services.get_user_folder(auth_user.user_id, folder_id, session):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
+    return await session.with_transaction(
+        lambda s: note_services.update_note(
+            note_id, note.model_dump(exclude_unset=True), s
+        )
+    )
+
+
+@router.delete(
+    "/{folder_id}/notes/{note_id}",
+    description="Delete a given Note in a given Folder",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def delete_note(
+    folder_id: str,
+    note_id: str,
+    session: "Session" = Depends(get_session),
+    auth_user: "AuthUser" = Depends(get_auth_user),
+) -> None:
+    if not await services.get_user_folder(auth_user.user_id, folder_id, session):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
+    await session.with_transaction(lambda s: note_services.delete_note(note_id, s))

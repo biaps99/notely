@@ -168,7 +168,8 @@ const changeNoteTitle = async (
     try {
       const updatedNote = await api.updateNote(
         { title: updatedTitle },
-        note.id
+        note.id,
+        note.folder_id
       );
       note.last_updated_at = updatedNote.last_updated_at;
       note.title = updatedNote.title;
@@ -311,7 +312,7 @@ const createNoteItem = (
     const confirmDelete = window.confirm(
       `Are you sure you want to delete the note ${note.title}?`
     );
-    if (confirmDelete) deleteNote(note.id, noteItem, api);
+    if (confirmDelete) deleteNote(note.id, note.folder_id, noteItem, api);
   });
 
   const noteDetails = dom.createDivElement('sidebar__note_details');
@@ -405,17 +406,19 @@ const createEditableNoteTitle = (
 /**
  * Deletes a note from the sidebar.
  * @param noteId - The ID of the note to delete.
+ * @param folderId - The ID of the folder that contains the note.
  * @param sidebar - The sidebar element for localized queries.
  * @param api - The API object.
  * @returns A promise that resolves when the note is deleted.
  */
 const deleteNote = async (
   noteId: string,
+  folderId: string,
   noteItem: HTMLElement,
   api: typeof defaultApi
 ) => {
   try {
-    await api.deleteNote(noteId);
+    await api.deleteNote(noteId, folderId);
     noteItem.remove();
   } catch (error) {
     // TODO: Handle error
@@ -499,10 +502,12 @@ const addNewNote = async (
       ) as HTMLElement;
       expandFolderButton.click();
     }
-    const newNote = await api.createNote({
-      title: 'New Note',
-      folder_id: folder.id,
-    });
+    const newNote = await api.createNote(
+      {
+        title: 'New Note',
+      },
+      folder.id
+    );
     const noteList = dom.queryElement(folderItem, '.sidebar__note_list');
     const newNoteItem = createNoteItem(
       newNote,

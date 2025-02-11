@@ -36,12 +36,15 @@ async def session() -> "AsyncGenerator[Session, None]":
         yield session
 
 
+@pytest.fixture
+def auth_user():
+    return AuthUser(name="test_name", email="test_email", user_id="test_id")
+
+
 @pytest_asyncio.fixture
-async def client() -> "AsyncGenerator[AsyncClient, None]":
+async def client(auth_user) -> "AsyncGenerator[AsyncClient, None]":
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
     ) as ac:
-        app.dependency_overrides[get_auth_user] = lambda: AuthUser(
-            name="test_name", email="test_email", user_id="test_id"
-        )
+        app.dependency_overrides[get_auth_user] = lambda: auth_user
         yield ac

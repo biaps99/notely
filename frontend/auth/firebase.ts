@@ -7,20 +7,38 @@ import { getAuth, GithubAuthProvider } from 'firebase/auth';
 import * as firebaseui from 'firebaseui';
 import * as dom from '../dom';
 
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+let _app;
+let _appAuth;
+let _ui;
+
+function getFirebaseConfig() {
+  return {
+    apiKey: process.env.FIREBASE_API_KEY,
+    authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.FIREBASE_APP_ID,
+  };
+}
+
+const getApp = () => {
+  if (_app) return _app;
+  _app = initializeApp(getFirebaseConfig());
+  return _app;
 };
 
-const app = initializeApp(firebaseConfig);
+const getAppAuth = () => {
+  if (_appAuth) return _appAuth;
+  _appAuth = getAuth(getApp());
+  return _appAuth;
+};
 
-const appAuth = getAuth(app);
-
-const ui = new firebaseui.auth.AuthUI(appAuth);
+const getUi = () => {
+  if (_ui) return _ui;
+  _ui = new firebaseui.auth.AuthUI(getAppAuth());
+  return _ui;
+};
 
 const uiConfig = {
   signInSuccessUrl: '/',
@@ -32,18 +50,18 @@ const addAuthContainer = (root: HTMLElement) => {
   const container = dom.createDivElement('firebaseui-auth-container');
   container.id = 'firebaseui-auth-container';
   root.appendChild(container);
-  ui.start('#firebaseui-auth-container', uiConfig);
+  getUi().start('#firebaseui-auth-container', uiConfig);
 };
 
 const signOut = async () => {
-  await firebaseSignOut(appAuth);
+  await firebaseSignOut(getAppAuth());
 };
 
 const onAuthStateChanged = (callback: any) =>
-  firebaseonAuthStateChanged(appAuth, callback);
+  firebaseonAuthStateChanged(getAppAuth(), callback);
 
 const getToken = async (): Promise<string | null> => {
-  const user = appAuth.currentUser;
+  const user = getAppAuth().currentUser;
   return user ? await user.getIdToken() : null;
 };
 

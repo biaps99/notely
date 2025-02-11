@@ -7,7 +7,6 @@ from core.schemas import StrObjectId
 
 class NoteCreate(BaseModel):
     title: str = Field(examples=["Vacations"])
-    folder_id: StrObjectId = Field(examples=["db490d0c-8e01-4ee4-8c36-abad040a0a0c"])
 
     model_config = ConfigDict(extra="ignore", frozen=True)
 

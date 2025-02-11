@@ -16,14 +16,26 @@
             "jinja": false,
         },
         {
+            "name": "Backend Tests Debugger",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "--pdb",
+                "--maxfail=1",
+                "--disable-warnings"
+            ],
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}/backend",
+            "console": "integratedTerminal",
+        },
+        {
             "name": "Frontend Tests Debugger",
             "type": "node",
             "request": "launch",
             "program": "${workspaceFolder}/frontend/node_modules/jest/bin/jest.js",
             "args": [
                 "--runInBand",
-                "-t",
-                "adds a new folder when"
             ],
             "cwd": "${workspaceFolder}/frontend",
             "console": "integratedTerminal",

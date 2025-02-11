@@ -1,3 +1,6 @@
+import { auth as firebaseAuth } from './firebase';
+import { auth as fakeAuth } from './fake';
+
 type User = {
   uid: string;
   name: string;
@@ -12,16 +15,5 @@ type Auth = {
   getToken: () => Promise<string | null>;
 };
 
-let auth: Auth;
-
-if (process.env.NODE_ENV === 'test') {
-  import('./fake').then((module) => {
-    auth = module.auth;
-  });
-} else {
-  import('./firebase').then((module) => {
-    auth = module.auth;
-  });
-}
-
-export { auth };
+export const auth: Auth =
+  process.env.NODE_ENV === 'testing' ? fakeAuth : firebaseAuth;

@@ -6,64 +6,19 @@ from notes import services
 
 @pytest.mark.asyncio
 async def test__create_note__should_create_note(session):
+    folder_id = ObjectId()
     payload = {
         "title": "Test Note",
         "content": "This is a test.",
-        "folder_id": ObjectId(),
     }
 
-    await services.create_note(payload, session)
+    await services.create_note(folder_id, payload, session)
 
     note = await session.notes.find_one({"title": payload["title"]})
 
     assert note, "Note was not created"
     assert note["content"] == payload["content"]
-    assert note["folder_id"] == payload["folder_id"]
-
-
-@pytest.mark.asyncio
-async def test__get_notes__should_return_notes(
-    session,
-):
-    folder_result = await session.folders.insert_one({"name": "Test Folder"})
-    note_payload = {
-        "title": "Note",
-        "content": "Content",
-        "folder_id": folder_result.inserted_id,
-    }
-    await session.notes.insert_one(note_payload)
-
-    notes = await services.get_notes(session)
-
-    assert len(notes) == 1
-    assert notes[0]["title"] == note_payload["title"]
-    assert notes[0]["content"] == note_payload["content"]
-    assert notes[0]["folder_id"] == note_payload["folder_id"]
-
-
-@pytest.mark.asyncio
-async def test__get_notes__should_return_notes_in_order(
-    session,
-):
-    folder_result = await session.folders.insert_one({"name": "Test Folder"})
-    note_1 = {
-        "title": "Note 1",
-        "content": "Content 1",
-        "folder_id": folder_result.inserted_id,
-    }
-    await session.notes.insert_one(note_1)
-    note_2 = {
-        "title": "Note 2",
-        "content": "Content 2",
-        "folder_id": folder_result.inserted_id,
-    }
-    await session.notes.insert_one(note_2)
-
-    notes = await services.get_notes(session)
-
-    assert len(notes) == 2
-    assert notes[0]["title"] == note_1["title"]
-    assert notes[1]["title"] == note_2["title"]
+    assert note["folder_id"] == folder_id
 
 
 @pytest.mark.asyncio
@@ -156,13 +111,14 @@ async def test__delete_note__given_unexistent_note__should_raise(session):
 
 @pytest.mark.asyncio
 async def test__create_note__without_optional_fields__should_succeed(session):
-    payload = {"title": "Test Note", "folder_id": ObjectId()}
+    payload = {"title": "Test Note"}
+    folder_id = ObjectId()
 
-    created_note = await services.create_note(payload, session)
+    created_note = await services.create_note(folder_id, payload, session)
 
     assert created_note["title"] == payload["title"]
     assert created_note["folder_id"] == payload["folder_id"]
-    assert "content" not in created_note  # Content is optional
+    assert "content" not in created_note
 
 
 @pytest.mark.asyncio
@@ -181,14 +137,15 @@ async def test__update_note__with_empty_payload__should_not_remove_existing_fiel
     updated_note = await session.notes.find_one({"_id": result.inserted_id})
 
     assert updated_note["title"] == note["title"]
-    assert updated_note["content"] == note["content"]  # Fields should be unchanged
+    assert updated_note["content"] == note["content"]
 
 
 @pytest.mark.asyncio
 async def test__create_note__should_trigger_create_event(session):
-    payload = {"title": "Test Note", "folder_id": ObjectId()}
+    payload = {"title": "Test Note"}
+    folder_id = ObjectId()
 
-    result = await services.create_note(payload, session)
+    result = await services.create_note(folder_id, payload, session)
 
     events = await session.events.find().to_list()
 
@@ -241,26 +198,6 @@ async def test__delete_note__with_invalid_id__should_raise(session):
 
     with pytest.raises(errors.InvalidId):
         await services.delete_note(invalid_id, session)
-
-
-@pytest.mark.asyncio
-async def test__get_notes__with_pagination__should_return_limited_results(session):
-    notes = [
-        {
-            "title": f"Note {i}",
-            "content": f"Content {i}",
-            "folder_id": str(ObjectId()),
-            "last_updated_at": f"2022-01-{i}T00:00:00Z",
-        }
-        for i in range(5)
-    ]
-    await session.notes.insert_many(notes)
-
-    results = await services.get_notes(session, limit=2, offset=1)
-
-    assert len(results) == 2
-    assert results[0]["title"] == "Note 1"
-    assert results[1]["title"] == "Note 2"
 
 
 @pytest.mark.asyncio

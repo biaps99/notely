@@ -4,9 +4,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --port 3000 --host",
+    "dev": "NODE_ENV=development vite --port 3000 --host",
     "format": "prettier --write .",
-    "test": "NODE_ENV=test jest"
+    "test": "NODE_ENV=testing jest"
   },
   "dependencies": {
     "axios": "^1.7.9",
