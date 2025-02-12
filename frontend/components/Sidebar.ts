@@ -77,8 +77,9 @@ const createFolderItem = (
   sidebar: HTMLElement
 ): HTMLElement => {
   const folderItem = dom.createDivElement('sidebar__folder_item');
-  const header = dom.createDivElement('sidebar__folder_header');
+  folderItem.id = `folder-item-${folder.id}`;
 
+  const header = dom.createDivElement('sidebar__folder_header');
   header.append(
     createEditableFolderName(folder, api),
     createOptionsButton(folder, api, folderItem),
@@ -86,7 +87,58 @@ const createFolderItem = (
   );
   folderItem.appendChild(header);
 
+  addDragAndDropListeners(folderItem, folder, api, sidebar);
+
   return folderItem;
+};
+
+/**
+ * Adds drag and drop event listeners to the folder item.
+ * @param folderItem - The folder item element.
+ * @param folder - The folder to create.
+ * @param api - The API object.
+ * @param sidebar - The sidebar element for localized queries.
+ */
+const addDragAndDropListeners = (
+  folderItem: HTMLElement,
+  folder: types.Folder,
+  api: typeof defaultApi,
+  sidebar: HTMLElement
+): void => {
+  folderItem.addEventListener('dragover', (event) => {
+    event.preventDefault();
+    folderItem.classList.add('drag-over');
+  });
+
+  folderItem.addEventListener('dragleave', () => {
+    folderItem.classList.remove('drag-over');
+  });
+
+  folderItem.addEventListener('drop', async (event) => {
+    event.preventDefault();
+    folderItem.classList.remove('drag-over');
+
+    const data = event.dataTransfer?.getData('application/json');
+    if (!data) return;
+    const { noteId, originFolderId } = JSON.parse(data);
+    const targetFolderId = folder.id;
+    if (originFolderId === targetFolderId) return;
+
+    await api.updateNote({ folder_id: targetFolderId }, noteId, targetFolderId);
+
+    folderItem.getElementsByClassName('sidebar__note_list')[0]?.remove();
+    showFolderNotes(folder.id, folderItem, api, sidebar);
+    folder.isExpanded = true;
+    dom.queryElement(folderItem, '.sidebar__folder_collapse')!.textContent = '-';
+
+    const originFolderItem = dom.queryElement(
+      sidebar,
+      `#folder-item-${originFolderId}`
+    )! as HTMLElement;
+    const noteList = dom.queryElement(originFolderItem, '.sidebar__note_list');
+    noteList?.remove();
+    dom.queryElement(originFolderItem, '.sidebar__folder_collapse')!.textContent = '+';
+  });
 };
 
 /**
@@ -263,14 +315,9 @@ const showFolderNotes = async (
   api: typeof defaultApi,
   sidebar: HTMLElement
 ): Promise<void> => {
-  try {
-    const notes = await api.fetchFolderNotes(folderId);
-    folderItem.appendChild(createNoteList(notes, sidebar, api));
-    if (notes.length > 0) selectNote(notes[0], sidebar);
-  } catch (error) {
-    // TODO: Handle error
-    throw error;
-  }
+  const notes = await api.fetchFolderNotes(folderId);
+  folderItem.appendChild(createNoteList(notes, sidebar, api));
+  if (notes.length > 0) selectNote(notes[0], sidebar);
 };
 
 /**
@@ -326,6 +373,19 @@ const createNoteItem = (
 
   noteItem.append(noteDetails, deleteButton);
   noteItem.addEventListener('click', () => selectNote(note, sidebar));
+
+  noteItem.draggable = true;
+  noteItem.addEventListener('dragstart', (event) => {
+    event.dataTransfer?.setData(
+      'application/json',
+      JSON.stringify({
+        noteId: note.id,
+        originFolderId: note.folder_id,
+      })
+    );
+    event.dataTransfer!.effectAllowed = 'move';
+  });
+
   return noteItem;
 };
 
@@ -355,20 +415,15 @@ const addNewFolder = async (
   api: typeof defaultApi,
   sidebar: HTMLElement
 ) => {
-  try {
-    const newFolder = await api.createFolder(folder);
-    const folderList = dom.queryElement(sidebar, '.sidebar__folder_list');
-    const newFolderItem = createFolderItem(newFolder, api, sidebar);
-    folderList.appendChild(newFolderItem);
-    const folderName = dom.queryElement(
-      newFolderItem,
-      '.sidebar__folder_name'
-    ) as HTMLElement;
-    folderName.click();
-  } catch (error) {
-    // TODO: Handle error
-    throw error;
-  }
+  const newFolder = await api.createFolder(folder);
+  const folderList = dom.queryElement(sidebar, '.sidebar__folder_list');
+  const newFolderItem = createFolderItem(newFolder, api, sidebar);
+  folderList.appendChild(newFolderItem);
+  const folderName = dom.queryElement(
+    newFolderItem,
+    '.sidebar__folder_name'
+  ) as HTMLElement;
+  folderName.click();
 };
 
 /**
@@ -417,13 +472,8 @@ const deleteNote = async (
   noteItem: HTMLElement,
   api: typeof defaultApi
 ) => {
-  try {
-    await api.deleteNote(noteId, folderId);
-    noteItem.remove();
-  } catch (error) {
-    // TODO: Handle error
-    throw error;
-  }
+  await api.deleteNote(noteId, folderId);
+  noteItem.remove();
 };
 
 /**
@@ -494,36 +544,31 @@ const addNewNote = async (
   api: typeof defaultApi,
   folderItem: HTMLElement
 ) => {
-  try {
-    if (!folder.isExpanded) {
-      const expandFolderButton = dom.queryElement(
-        folderItem,
-        '.sidebar__folder_collapse'
-      ) as HTMLElement;
-      expandFolderButton.click();
-    }
-    const newNote = await api.createNote(
-      {
-        title: 'New Note',
-      },
-      folder.id
-    );
-    const noteList = dom.queryElement(folderItem, '.sidebar__note_list');
-    const newNoteItem = createNoteItem(
-      newNote,
-      folderItem.parentElement as HTMLElement,
-      api
-    );
-    noteList?.appendChild(newNoteItem);
-    const newNoteTitle = dom.queryElement(
-      newNoteItem as HTMLElement,
-      '.sidebar__note_title'
+  if (!folder.isExpanded) {
+    const expandFolderButton = dom.queryElement(
+      folderItem,
+      '.sidebar__folder_collapse'
     ) as HTMLElement;
-    newNoteTitle.click();
-  } catch (error) {
-    // TODO: Handle error
-    throw error;
+    expandFolderButton.click();
   }
+  const newNote = await api.createNote(
+    {
+      title: 'New Note',
+    },
+    folder.id
+  );
+  const noteList = dom.queryElement(folderItem, '.sidebar__note_list');
+  const newNoteItem = createNoteItem(
+    newNote,
+    folderItem.parentElement as HTMLElement,
+    api
+  );
+  noteList?.appendChild(newNoteItem);
+  const newNoteTitle = dom.queryElement(
+    newNoteItem as HTMLElement,
+    '.sidebar__note_title'
+  ) as HTMLElement;
+  newNoteTitle.click();
 };
 
 /**
@@ -537,11 +582,6 @@ const deleteFolder = async (
   folderItem: HTMLElement,
   api: typeof defaultApi
 ) => {
-  try {
-    await api.deleteFolder(folderId);
-    folderItem.remove();
-  } catch (error) {
-    // TODO: Handle error
-    throw error;
-  }
+  await api.deleteFolder(folderId);
+  folderItem.remove();
 };

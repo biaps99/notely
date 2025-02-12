@@ -44,12 +44,14 @@ class DevelopmentSettings(Settings):
     PORT: int = os.getenv("PORT", 8000)
     ALLOWED_ORIGINS: list[str] = os.getenv("ALLOWED_ORIGINS", ["http://localhost:3000"])
     FIREBASE_CONFIG: FirebaseConfig = FirebaseConfig(
-        project_id=os.getenv("FIREBASE_PROJECT_ID"),
-        private_key_id=os.getenv("FIREBASE_PRIVATE_KEY_ID"),
-        private_key=os.getenv("FIREBASE_PRIVATE_KEY"),
-        client_email=os.getenv("FIREBASE_CLIENT_EMAIL"),
-        client_id=os.getenv("FIREBASE_CLIENT_ID"),
-        client_x509_cert_url=os.getenv("FIREBASE_CLIENT_X509_CERT_URL"),
+        project_id=os.getenv("FIREBASE_PROJECT_ID", "development"),
+        private_key_id=os.getenv("FIREBASE_PRIVATE_KEY_ID", "private_key_id"),
+        private_key=os.getenv("FIREBASE_PRIVATE_KEY", "private_key"),
+        client_email=os.getenv("FIREBASE_CLIENT_EMAIL", "client_email"),
+        client_id=os.getenv("FIREBASE_CLIENT_ID", "client_id"),
+        client_x509_cert_url=os.getenv(
+            "FIREBASE_CLIENT_X509_CERT_URL", "client_x509_cert_url"
+        ),
     )
 
 

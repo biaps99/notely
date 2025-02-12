@@ -17,6 +17,9 @@ class NoteUpdate(BaseModel):
     last_updated_at: Optional[AwareDatetime] = Field(
         default=None, examples=["2022-01-01T00:00:00Z"]
     )
+    folder_id: Optional[StrObjectId] = Field(
+        default=None, examples=["db490d0c-8e01-4ee4-8c36-abad040a0a0c"]
+    )
 
     model_config = ConfigDict(extra="ignore", frozen=True)
 

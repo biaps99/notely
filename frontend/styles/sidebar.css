@@ -229,6 +229,49 @@
   transform: scale(1.1);
 }
 
+/* Dragging Note */
+.sidebar__note_item.dragging {
+  opacity: 0.6;
+  transform: rotate(-2deg) scale(1.05);
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+/* Drag-over effect for folders */
+.sidebar__folder_item {
+  position: relative; /* Ensure pseudo-element positioning is relative to the item */
+  padding: 10px; /* Add padding to increase the interactive area */
+  transition: all 0.2s ease-in-out;
+}
+
+.sidebar__folder_item.drag-over {
+  background-color: rgba(0, 168, 89, 0.15);
+  border: 2px dashed #00a859;
+  box-shadow: 0 0 8px rgba(0, 168, 89, 0.3);
+  animation: fadeInDropTarget 0.2s ease-in-out;
+}
+
+/* Optional: Add animation effect for the drag-over state */
+@keyframes fadeInDropTarget {
+  from {
+    opacity: 0.5;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Optional: Responsive styles for the drag-over area */
+@media (max-width: 768px) {
+  .sidebar__folder_item {
+    padding: 8px;  /* Slightly reduce padding on smaller screens */
+  }
+}
+
+
 /* Media Queries */
 @media (max-width: 768px) {
   .sidebar {

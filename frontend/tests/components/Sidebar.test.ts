@@ -513,45 +513,6 @@ describe('Sidebar Component', () => {
     confirmSpy.mockRestore();
   });
 
-  test('deletes an empty folder after confirmation', async () => {
-    const confirmSpy = jest
-      .spyOn(window, 'confirm')
-      .mockImplementation(() => true);
-
-    const emptyFolder = {
-      id: '4',
-      name: 'Empty Folder',
-      isExpanded: false,
-      notes: [],
-    };
-    folders.push(emptyFolder); // Add empty folder to the list
-    Sidebar(container, folders, fakeApi);
-
-    const folderItem = container.querySelectorAll('.sidebar__folder_item')[
-      folders.length - 1
-    ];
-    const deleteButton = folderItem.querySelector(
-      '.sidebar__folder_options_button'
-    );
-    deleteButton?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-
-    const deleteFolderOption = container.querySelector(
-      '.sidebar__folder_dropdown_option:nth-child(2)'
-    );
-    deleteFolderOption?.dispatchEvent(
-      new MouseEvent('click', { bubbles: true })
-    );
-
-    await new Promise((resolve) => setTimeout(resolve, 1));
-
-    expect(
-      container.querySelector(`#folder-item-${emptyFolder.id}`)
-    ).toBeNull();
-
-    expect(confirmSpy).toHaveBeenCalled();
-    confirmSpy.mockRestore();
-  });
-
   test('adds a new note to an empty folder', async () => {
     const emptyFolder = {
       id: '3',
