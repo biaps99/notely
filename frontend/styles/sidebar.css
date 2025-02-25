@@ -267,10 +267,9 @@
 /* Optional: Responsive styles for the drag-over area */
 @media (max-width: 768px) {
   .sidebar__folder_item {
-    padding: 8px;  /* Slightly reduce padding on smaller screens */
+    padding: 8px; /* Slightly reduce padding on smaller screens */
   }
 }
-
 
 /* Media Queries */
 @media (max-width: 768px) {

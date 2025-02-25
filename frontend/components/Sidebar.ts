@@ -2,6 +2,7 @@ import * as types from '../types';
 import * as dom from '../dom';
 import * as defaultApi from '../api';
 import * as utils from '../utils';
+import * as events from '../events';
 
 /**
  * Creates and manages the sidebar.
@@ -129,7 +130,8 @@ const addDragAndDropListeners = (
     folderItem.getElementsByClassName('sidebar__note_list')[0]?.remove();
     showFolderNotes(folder.id, folderItem, api, sidebar);
     folder.isExpanded = true;
-    dom.queryElement(folderItem, '.sidebar__folder_collapse')!.textContent = '-';
+    dom.queryElement(folderItem, '.sidebar__folder_collapse')!.textContent =
+      '-';
 
     const originFolderItem = dom.queryElement(
       sidebar,
@@ -137,7 +139,10 @@ const addDragAndDropListeners = (
     )! as HTMLElement;
     const noteList = dom.queryElement(originFolderItem, '.sidebar__note_list');
     noteList?.remove();
-    dom.queryElement(originFolderItem, '.sidebar__folder_collapse')!.textContent = '+';
+    dom.queryElement(
+      originFolderItem,
+      '.sidebar__folder_collapse'
+    )!.textContent = '+';
   });
 };
 
@@ -402,6 +407,7 @@ const selectNote = (note: types.Note, sidebar: HTMLElement): void => {
   const nextNote = dom.queryElement(sidebar, `#note-item-${note.id}`);
   selectedNote?.classList.remove('sidebar__note_item--selected');
   nextNote?.classList.add('sidebar__note_item--selected');
+  events.dispatchEvent(events.SELECTED_NOTE, note);
 };
 
 /**

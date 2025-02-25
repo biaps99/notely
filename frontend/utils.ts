@@ -14,3 +14,11 @@ export const formatDate = (dateString: string): string => {
     hour12: false,
   });
 };
+
+export const debounce = (func: Function, delay: number) => {
+  let timeoutId: number;
+  return (...args: any[]) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func(...args), delay);
+  };
+};

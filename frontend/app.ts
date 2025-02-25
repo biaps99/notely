@@ -36,6 +36,7 @@ export const render = (
       events.addEventListener(events.FETCHED_FOLDERS, (e) => {
         root.removeChild(sidebar);
         components.Sidebar(root, e.detail);
+        components.Editor(root);
       });
 
       components.Logout(root);

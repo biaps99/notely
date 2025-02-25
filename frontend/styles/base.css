@@ -18,9 +18,9 @@ body {
 /* Root Container */
 .root {
   display: flex;
-  height: 100%;
-  background-color: #f7f7f7;
-  justify-content: flex-start;
+  height: 100vh;
+  width: 100%;
+  flex-direction: row;
 }
 
 /* Content Wrapper */

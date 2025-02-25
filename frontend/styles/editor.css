@@ -1,0 +1,51 @@
+/* Editor */
+.editor {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5em;
+  background-color: #ffffff;
+  border-radius: 0 12px 12px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s ease;
+  overflow: hidden;
+  margin-top: 70px;
+}
+
+/* Editor Content */
+.editor__content {
+  flex-grow: 1;
+  padding: 2em 1em 1em;
+  font-size: 1rem;
+  line-height: 1.6;
+  border: none;
+  outline: none;
+  resize: none;
+  background-color: #ffffff;
+  color: #333;
+  border-radius: 0 0 12px 12px;
+  overflow-y: auto;
+}
+
+.quill-editor {
+  margin-top: 50px; /* Adjust as needed */
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+  .root {
+    flex-direction: column; /* Stack sidebar and editor vertically */
+  }
+
+  .sidebar {
+    width: 100%;
+    border-radius: 12px 12px 0 0;
+    border-right: none;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  .editor {
+    border-radius: 0;
+    padding: 1em;
+  }
+}

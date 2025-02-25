@@ -50,3 +50,4 @@ export const dispatchEvent = (eventName: string, detail: any): void => {
 export const FETCHED_FOLDERS = 'fetchedFolders';
 export const UPDATED_FOLDER = 'updatedFolder';
 export const CREATED_FOLDER = 'createdFolder';
+export const SELECTED_NOTE = 'selectedNote';
