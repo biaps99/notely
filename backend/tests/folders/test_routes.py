@@ -1,6 +1,7 @@
 import pytest
 from bson import ObjectId, errors
 from folders.constants import API_PREFIX
+from tempfile import NamedTemporaryFile
 
 
 @pytest.mark.asyncio
@@ -399,3 +400,82 @@ async def test__get_notes__given_pagination_exceeding_notes__should_return_corre
     assert response.status_code == 200, response.text
     res_json = response.json()
     assert len(res_json) == 2, "Should return only available notes"
+
+
+@pytest.mark.asyncio
+async def test__upload_image_in_note__given_valid_payload__should_return_ok(
+    client, session, auth_user
+):
+    result = await session.folders.insert_one(
+        {"name": "Test Folder", "owner_id": auth_user.user_id}
+    )
+    folder_id = str(result.inserted_id)
+    result = await session.notes.insert_one(
+        {"title": "Note", "content": "Content", "folder_id": folder_id}
+    )
+    note_id = str(result.inserted_id)
+
+    with NamedTemporaryFile(suffix=".jpg") as temp_file:
+        temp_file.write(b"test image content")
+        temp_file.seek(0)
+
+        response = await client.post(
+            f"{API_PREFIX}/{folder_id}/notes/{note_id}/images",
+            files={"image_file": ("test.jpg", temp_file, "image/jpeg")},
+        )
+
+    assert response.status_code == 200, response.text
+    res_json = response.json()
+    assert res_json == {
+        "path": f"http://test:4000/uploads/{auth_user.user_id}/test.jpg"
+    }
+
+
+@pytest.mark.asyncio
+async def test__upload_image_in_note__given_not_note_owner__should_fail(
+    client, session, auth_user
+):
+    result = await session.folders.insert_one(
+        {"name": "Test Folder", "owner_id": "other_user_id"}
+    )
+    folder_id = str(result.inserted_id)
+    result = await session.notes.insert_one(
+        {"title": "Note", "content": "Content", "folder_id": folder_id}
+    )
+    note_id = str(result.inserted_id)
+
+    with NamedTemporaryFile(suffix=".jpg") as temp_file:
+        temp_file.write(b"test image content")
+        temp_file.seek(0)
+
+        response = await client.post(
+            f"{API_PREFIX}/{folder_id}/notes/{note_id}/images",
+            files={"image_file": ("test.jpg", temp_file, "image/jpeg")},
+        )
+
+    assert response.status_code == 404, response.text
+
+
+@pytest.mark.asyncio
+async def test__upload_image_in_note__given_not_note_from_folder__should_fail(
+    client, session, auth_user
+):
+    result = await session.folders.insert_one(
+        {"name": "Test Folder", "owner_id": auth_user.user_id}
+    )
+    folder_id = ObjectId()
+    result = await session.notes.insert_one(
+        {"title": "Note", "content": "Content", "folder_id": folder_id}
+    )
+    note_id = str(result.inserted_id)
+
+    with NamedTemporaryFile(suffix=".jpg") as temp_file:
+        temp_file.write(b"test image content")
+        temp_file.seek(0)
+
+        response = await client.post(
+            f"{API_PREFIX}/{folder_id}/notes/{note_id}/images",
+            files={"image_file": ("test.jpg", temp_file, "image/jpeg")},
+        )
+
+    assert response.status_code == 404, response.text

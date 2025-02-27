@@ -49,12 +49,12 @@ async def get_folder_notes(
 
 
 async def update_note(
-    note_id: str, note: "dict[str, typing.Any]", session: "Session"
+    note_id: str, folder_id: str, note: "dict[str, typing.Any]", session: "Session"
 ) -> "dict[str, typing.Any]":
     event_payload = copy.deepcopy(note)
     document = {**note, "last_updated_at": get_now_utc()}
     update_result = await session.notes.update_one(
-        {"_id": ObjectId(note_id)}, {"$set": document}
+        {"_id": ObjectId(note_id), "folder_id": folder_id}, {"$set": document}
     )
     if update_result.modified_count:
         await create_event(
@@ -67,9 +67,19 @@ async def update_note(
     return document
 
 
-async def delete_note(note_id: str, session: "Session") -> None:
-    delete_result = await session.notes.delete_one({"_id": ObjectId(note_id)})
+async def delete_note(note_id: str, folder_id: str, session: "Session") -> None:
+    delete_result = await session.notes.delete_one(
+        {"_id": ObjectId(note_id), "folder_id": folder_id}
+    )
     if delete_result.deleted_count:
         await create_event(
             Event(aggregate_id=note_id, type=NoteEventType.DELETED, payload={}), session
         )
+
+
+async def get_folder_note(
+    note_id: str, folder_id: str, session: "Session"
+) -> "typing.Optional[dict[str, typing.Any]]":
+    return await session.notes.find_one(
+        {"_id": ObjectId(note_id), "folder_id": folder_id}
+    )

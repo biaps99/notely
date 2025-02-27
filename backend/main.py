@@ -45,6 +45,18 @@ for router in [core_router, folder_router]:
     app.include_router(router)
 
 
+if not settings.IS_PRODUCTION_ENV:
+    from os import makedirs
+    from fastapi.staticfiles import StaticFiles
+
+    makedirs(settings.UPLOAD_DIR_NAME, exist_ok=True)
+    app.mount(
+        f"/{settings.UPLOAD_DIR_NAME}",
+        StaticFiles(directory=settings.UPLOAD_DIR_NAME),
+        name=settings.UPLOAD_DIR_NAME,
+    )
+
+
 @app.get("/", include_in_schema=False)
 async def home() -> RedirectResponse:
     return RedirectResponse(url=DOCS_URL)

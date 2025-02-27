@@ -1,8 +1,18 @@
 version = 1
+revision = 1
 requires-python = ">=3.12"
 resolution-markers = [
     "python_full_version >= '3.13'",
     "python_full_version < '3.13'",
+]
+
+[[package]]
+name = "aiofiles"
+version = "24.1.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/0b/03/a88171e277e8caa88a4c77808c20ebb04ba74cc4681bf1e9416c862de237/aiofiles-24.1.0.tar.gz", hash = "sha256:22a075c9e5a3810f0c2e48f3008c94d68c65d763b9b03857924c99e57355166c", size = 30247 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a5/45/30bb92d442636f570cb5651bc661f52b610e2eec3f891a5dc3a4c3667db0/aiofiles-24.1.0-py3-none-any.whl", hash = "sha256:b4ec55f4195e3eb5d7abd1bf7e061763e864dd4954231fb8539a0ef8bb8260e5", size = 15896 },
 ]
 
 [[package]]
@@ -46,6 +56,9 @@ version = "0.1.0"
 source = { virtual = "." }
 
 [package.dev-dependencies]
+dev = [
+    { name = "aiofiles" },
+]
 lint = [
     { name = "ruff" },
 ]
@@ -70,7 +83,7 @@ test = [
 [package.metadata]
 
 [package.metadata.requires-dev]
-dev = []
+dev = [{ name = "aiofiles", specifier = ">=24.1.0" }]
 lint = [{ name = "ruff" }]
 prod = [
     { name = "fastapi", extras = ["standard"], specifier = ">=0.115.6" },
@@ -371,50 +384,11 @@ wheels = [
 ]
 
 [[package]]
-name = "future"
-version = "1.0.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/a7/b2/4140c69c6a66432916b26158687e821ba631a4c9273c474343badf84d3ba/future-1.0.0.tar.gz", hash = "sha256:bd2968309307861edae1458a4f8a4f3598c03be43b97521076aebf5d94c07b05", size = 1228490 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/da/71/ae30dadffc90b9006d77af76b393cb9dfbfc9629f339fc1574a1c52e6806/future-1.0.0-py3-none-any.whl", hash = "sha256:929292d34f5872e70396626ef385ec22355a1fae8ad29e1a734c3e43f9fbc216", size = 491326 },
-]
-
-[[package]]
-name = "gax-google-logging-v2"
-version = "0.8.3"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "google-gax" },
-    { name = "googleapis-common-protos" },
-    { name = "grpc-google-logging-v2" },
-    { name = "oauth2client" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/a9/fc/7c36d12946385c7bbf2e74140d2b7836ebc73f9e038b2bbf68a771d95e61/gax-google-logging-v2-0.8.3.tar.gz", hash = "sha256:c36cbb93e070b3b535e9fffff6879efe447e525dff75b62eb4564def515e1a18", size = 13116 }
-
-[[package]]
-name = "gax-google-pubsub-v1"
-version = "0.8.3"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "google-gax" },
-    { name = "googleapis-common-protos" },
-    { name = "grpc-google-pubsub-v1" },
-    { name = "oauth2client" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/7c/b4/183ca4e47f2d2d2f07040be305bf985b0dae7923f7c2df0b261975e46778/gax-google-pubsub-v1-0.8.3.tar.gz", hash = "sha256:943df4aa05cf0302fa1616197d05e29adb62be2c0f55f80d8345439d72471526", size = 13793 }
-
-[[package]]
 name = "gcloud"
 version = "0.18.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "gax-google-logging-v2" },
-    { name = "gax-google-pubsub-v1" },
-    { name = "google-gax" },
     { name = "googleapis-common-protos" },
-    { name = "grpc-google-logging-v2" },
-    { name = "grpc-google-pubsub-v1" },
-    { name = "grpcio" },
     { name = "httplib2" },
     { name = "oauth2client" },
     { name = "protobuf" },
@@ -547,19 +521,6 @@ wheels = [
 ]
 
 [[package]]
-name = "google-gax"
-version = "0.12.5"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "future" },
-    { name = "grpcio" },
-    { name = "oauth2client" },
-    { name = "ply" },
-    { name = "protobuf" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/49/77/46fd88558e28768b1ce3bbb19c61f0b596f8cafbcc2356f236a6a6fa03ac/google-gax-0.12.5.tar.gz", hash = "sha256:63312a04cb87ca50e857245f05c582b2171807a30e61cef85006b983bf659cb9", size = 27927 }
-
-[[package]]
 name = "google-resumable-media"
 version = "2.7.2"
 source = { registry = "https://pypi.org/simple" }
@@ -615,28 +576,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/e2/72/576815ba674eddc3c25028238f74d7b8068902b3968cbe456771b166455e/greenlet-3.1.1-cp313-cp313t-musllinux_1_1_aarch64.whl", hash = "sha256:04b013dc07c96f83134b1e99888e7a79979f1a247e2a9f59697fa14b5862ed01", size = 1122731 },
     { url = "https://files.pythonhosted.org/packages/ac/38/08cc303ddddc4b3d7c628c3039a61a3aae36c241ed01393d00c2fd663473/greenlet-3.1.1-cp313-cp313t-musllinux_1_1_x86_64.whl", hash = "sha256:411f015496fec93c1c8cd4e5238da364e1da7a124bcb293f085bf2860c32c6f6", size = 1142112 },
 ]
-
-[[package]]
-name = "grpc-google-logging-v2"
-version = "0.8.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "googleapis-common-protos" },
-    { name = "grpcio" },
-    { name = "oauth2client" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/bc/41/898cedce619b553fe3a54d666a62e70119651befe05b22aa55476ac13757/grpc-google-logging-v2-0.8.1.tar.gz", hash = "sha256:4b6b4e603860b134b2cb8732bb4d1f2cec963d553497dcf70b3f5ecc99d7fb4f", size = 14060 }
-
-[[package]]
-name = "grpc-google-pubsub-v1"
-version = "0.8.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "googleapis-common-protos" },
-    { name = "grpcio" },
-    { name = "oauth2client" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/b7/98/b77bc4ace41b1804a2c124bda79f05b39e51a5b32904cb8840f61d2fe3c4/grpc-google-pubsub-v1-0.8.1.tar.gz", hash = "sha256:ab5a3a239a9678012cdc00a9b9a8fe8c75fca9a0035da41da3078145e9d967b9", size = 13066 }
 
 [[package]]
 name = "grpcio"
@@ -928,12 +867,6 @@ wheels = [
 ]
 
 [[package]]
-name = "ply"
-version = "3.8"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/96/e0/430fcdb6b3ef1ae534d231397bee7e9304be14a47a267e82ebcb3323d0b5/ply-3.8.tar.gz", hash = "sha256:e7d1bdff026beb159c9942f7a17e102c375638d9478a7ecd4cc0c76afd8de0b8", size = 157286 }
-
-[[package]]
 name = "proto-plus"
 version = "1.26.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1005,8 +938,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/39/1b/d0b013bf7d1af7cf0a6a4fce13f5fe5813ab225313755367b36e714a63f8/pycryptodome-3.21.0-cp36-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:18caa8cfbc676eaaf28613637a89980ad2fd96e00c564135bf90bc3f0b34dd93", size = 2254397 },
     { url = "https://files.pythonhosted.org/packages/14/71/4cbd3870d3e926c34706f705d6793159ac49d9a213e3ababcdade5864663/pycryptodome-3.21.0-cp36-abi3-win32.whl", hash = "sha256:280b67d20e33bb63171d55b1067f61fbd932e0b1ad976b3a184303a3dad22764", size = 1775641 },
     { url = "https://files.pythonhosted.org/packages/43/1d/81d59d228381576b92ecede5cd7239762c14001a828bdba30d64896e9778/pycryptodome-3.21.0-cp36-abi3-win_amd64.whl", hash = "sha256:b7aa25fc0baa5b1d95b7633af4f5f1838467f1815442b22487426f94e0d66c53", size = 1812863 },
-    { url = "https://files.pythonhosted.org/packages/25/b3/09ff7072e6d96c9939c24cf51d3c389d7c345bf675420355c22402f71b68/pycryptodome-3.21.0-pp27-pypy_73-manylinux2010_x86_64.whl", hash = "sha256:2cb635b67011bc147c257e61ce864879ffe6d03342dc74b6045059dfbdedafca", size = 1691593 },
-    { url = "https://files.pythonhosted.org/packages/a8/91/38e43628148f68ba9b68dedbc323cf409e537fd11264031961fd7c744034/pycryptodome-3.21.0-pp27-pypy_73-win32.whl", hash = "sha256:4c26a2f0dc15f81ea3afa3b0c87b87e501f235d332b7f27e2225ecb80c0b1cdd", size = 1765997 },
 ]
 
 [[package]]

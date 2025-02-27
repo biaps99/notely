@@ -14,7 +14,9 @@ test = [
     "pytest-xdist>=3.5.0",
     "pytest-cov>=3.0.0",
 ]
-dev = []
+dev = [
+    "aiofiles>=24.1.0",
+]
 prod = [
     "fastapi[standard]>=0.115.6",
     "pydantic-settings>=2.7.0",

@@ -38,7 +38,6 @@ export const Editor = (container: HTMLElement) => {
         delay: historyDelayInMilliseconds,
         userOnly: true,
       },
-      imageDrop: true,
     },
   });
 
@@ -63,6 +62,40 @@ export const Editor = (container: HTMLElement) => {
   }, updateDelayInMilliseconds);
 
   quill.on('text-change', updateNoteContent);
+
+  const handleImage = async () => {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'image/*');
+    input.click();
+
+    input.onchange = async () => {
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+
+        try {
+          const imageFile = await api.uploadImage(
+            file,
+            selectedNote.id,
+            selectedNote.folder_id
+          );
+          if (!imageFile) {
+            alert('Image upload failed');
+          }
+          quill.insertEmbed(
+            quill.getSelection().index,
+            'image',
+            imageFile.path
+          );
+        } catch (error) {
+          alert('Image upload failed');
+          throw error;
+        }
+      }
+    };
+  };
+
+  quill.getModule('toolbar').addHandler('image', handleImage);
 
   return editor;
 };

@@ -28,6 +28,10 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     RELOAD: bool = False
     ALLOWED_ORIGINS: list[str] = []
+    FILE_STORAGE_UPLOAD_PATH: str = "file_storage.upload_to_tmp"
+    UPLOAD_DIR_NAME: str = "uploads"
+    UPLOAD_URL: str = "http://test:4000"
+    IS_PRODUCTION_ENV: bool = False
 
     class Config:
         env_file = ".env"
@@ -53,6 +57,8 @@ class DevelopmentSettings(Settings):
             "FIREBASE_CLIENT_X509_CERT_URL", "client_x509_cert_url"
         ),
     )
+    FILE_STORAGE_UPLOAD_PATH: str = "file_storage.upload_to_fs"
+    UPLOAD_URL: str = f"http://{HOST}:{PORT}"
 
 
 class TestSettings(Settings):
@@ -66,6 +72,7 @@ class TestSettings(Settings):
         client_id="test_client_id",
         client_x509_cert_url="test_client_x509_cert_url",
     )
+    FILE_STORAGE_UPLOAD_PATH: str = "file_storage.upload_to_tmp"
 
 
 def _get_settings() -> Settings:

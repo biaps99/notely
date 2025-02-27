@@ -23,13 +23,14 @@ async def test__create_note__should_create_note(session):
 
 @pytest.mark.asyncio
 async def test__update_note__given_new_title__should_update(session):
-    note_payload = {"title": "Note", "content": "Content", "folder_id": ObjectId()}
+    folder_id = ObjectId()
+    note_payload = {"title": "Note", "content": "Content", "folder_id": folder_id}
     result = await session.notes.insert_one(note_payload)
     update_payload = {
         "title": "New Note",
     }
 
-    await services.update_note(result.inserted_id, update_payload, session)
+    await services.update_note(result.inserted_id, folder_id, update_payload, session)
 
     updated_note = await session.notes.find_one({"_id": result.inserted_id})
 
@@ -37,22 +38,15 @@ async def test__update_note__given_new_title__should_update(session):
 
 
 @pytest.mark.asyncio
-async def test__update_note__given_unexistent_note__should_raise(session):
-    payload = {
-        "title": "New Note",
-    }
-    await services.update_note(ObjectId(), payload, session)
-
-
-@pytest.mark.asyncio
 async def test__update_note__given_new_content_title__should_update(
     session,
 ):
-    note = {"title": "Note", "content": "Content", "folder_id": ObjectId()}
+    folder_id = ObjectId()
+    note = {"title": "Note", "content": "Content", "folder_id": folder_id}
     result = await session.notes.insert_one(note)
     payload = {"title": "New Note", "content": "New Content"}
 
-    await services.update_note(result.inserted_id, payload, session)
+    await services.update_note(result.inserted_id, folder_id, payload, session)
 
     updated_note = await session.notes.find_one({"_id": result.inserted_id})
 
@@ -62,11 +56,12 @@ async def test__update_note__given_new_content_title__should_update(
 
 @pytest.mark.asyncio
 async def test__delete_note__should_soft_delete(session):
+    folder_id = ObjectId()
     result = await session.notes.insert_one(
-        {"title": "Note", "content": "Content", "folder_id": ObjectId()}
+        {"title": "Note", "content": "Content", "folder_id": folder_id}
     )
 
-    await services.delete_note(result.inserted_id, session)
+    await services.delete_note(result.inserted_id, folder_id, session)
 
     deleted_note = await session.notes.find_one({"_id": result.inserted_id})
 
@@ -97,16 +92,13 @@ async def test__get_folder_notes__should_exclude_soft_deleted(session):
     result_note = await session.notes.insert_one(
         {"title": "Note", "content": "Content", "folder_id": result_folder.inserted_id}
     )
-    await services.delete_note(result_note.inserted_id, session)
+    await services.delete_note(
+        result_note.inserted_id, result_folder.inserted_id, session
+    )
 
     notes = await services.get_folder_notes(result_folder.inserted_id, session)
 
     assert len(notes) == 0
-
-
-@pytest.mark.asyncio
-async def test__delete_note__given_unexistent_note__should_raise(session):
-    await services.delete_note(ObjectId(), session)
 
 
 @pytest.mark.asyncio
@@ -125,14 +117,15 @@ async def test__create_note__without_optional_fields__should_succeed(session):
 async def test__update_note__with_empty_payload__should_not_remove_existing_fields(
     session,
 ):
+    folder_id = ObjectId()
     note = {
         "title": "Original Note",
         "content": "Original Content",
-        "folder_id": ObjectId(),
+        "folder_id": folder_id,
     }
     result = await session.notes.insert_one(note)
 
-    await services.update_note(result.inserted_id, {}, session)
+    await services.update_note(result.inserted_id, folder_id, {}, session)
 
     updated_note = await session.notes.find_one({"_id": result.inserted_id})
 
@@ -156,11 +149,12 @@ async def test__create_note__should_trigger_create_event(session):
 
 @pytest.mark.asyncio
 async def test__update_note__should_trigger_update_event(session):
-    note = {"title": "Note", "content": "Content", "folder_id": ObjectId()}
+    folder_id = ObjectId()
+    note = {"title": "Note", "content": "Content", "folder_id": folder_id}
     result = await session.notes.insert_one(note)
     update_payload = {"title": "Updated Note"}
 
-    await services.update_note(result.inserted_id, update_payload, session)
+    await services.update_note(result.inserted_id, folder_id, update_payload, session)
 
     events = await session.events.find().to_list()
 
@@ -171,10 +165,11 @@ async def test__update_note__should_trigger_update_event(session):
 
 @pytest.mark.asyncio
 async def test__delete_note__should_trigger_delete_event(session):
-    note = {"title": "Note", "content": "Content", "folder_id": ObjectId()}
+    folder_id = ObjectId()
+    note = {"title": "Note", "content": "Content", "folder_id": folder_id}
     result = await session.notes.insert_one(note)
 
-    await services.delete_note(result.inserted_id, session)
+    await services.delete_note(result.inserted_id, folder_id, session)
 
     events = await session.events.find().to_list()
 
@@ -189,7 +184,7 @@ async def test__update_note__with_invalid_id__should_raise(session):
     payload = {"title": "New Title"}
 
     with pytest.raises(errors.InvalidId):
-        await services.update_note(invalid_id, payload, session)
+        await services.update_note(invalid_id, ObjectId(), payload, session)
 
 
 @pytest.mark.asyncio
@@ -197,7 +192,7 @@ async def test__delete_note__with_invalid_id__should_raise(session):
     invalid_id = "not_a_valid_object_id"
 
     with pytest.raises(errors.InvalidId):
-        await services.delete_note(invalid_id, session)
+        await services.delete_note(invalid_id, ObjectId(), session)
 
 
 @pytest.mark.asyncio

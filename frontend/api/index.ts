@@ -115,6 +115,32 @@ const updateNote = async (
 };
 
 /**
+ * Uploads an image from a given note.
+ * @param imageData - The image data to upload.
+ * @param noteId - The ID of the note to update.
+ * @param folderId - The ID of the folder that contains the note.
+ * @returns A promise that resolves with the updated image data.
+ * @throws An error if the API request fails.
+ */
+const uploadImage = async (
+  image: File,
+  noteId: string,
+  folderId: string
+): Promise<File> => {
+  try {
+    const imageData = new FormData();
+    imageData.append('image_file', image);
+    const response: AxiosResponse = await api.post(
+      `/folders/${folderId}/notes/${noteId}/images`,
+      imageData
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
  * Deletes a note from the API.
  * @param noteId - The ID of the note to delete.
  * @param folderId - The ID of the folder that contains the note.
@@ -183,4 +209,5 @@ export {
   deleteNote,
   createNote,
   deleteFolder,
+  uploadImage,
 };

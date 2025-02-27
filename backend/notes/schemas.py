@@ -39,3 +39,9 @@ class NoteRetrieve(BaseModel):
     )
 
     model_config = ConfigDict(extra="ignore", frozen=True)
+
+
+class ImageUpload(BaseModel):
+    path: str = Field(examples="uploads/db490d0c-8e01-4ee4-8c36-abad040a0a0c/image.png")
+
+    model_config = ConfigDict(extra="ignore", frozen=True)

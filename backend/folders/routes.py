@@ -1,7 +1,16 @@
 from typing import TYPE_CHECKING
 
-from fastapi import APIRouter, Body, Depends, Query, status, HTTPException
-
+from fastapi import (
+    APIRouter,
+    Body,
+    Depends,
+    Query,
+    status,
+    HTTPException,
+    UploadFile,
+    File,
+)
+from file_storage import upload
 from database import get_session
 from folders import constants, schemas, services
 from notes import schemas as note_schemas, services as note_services
@@ -128,9 +137,30 @@ async def update_note(
 
     return await session.with_transaction(
         lambda s: note_services.update_note(
-            note_id, note.model_dump(exclude_unset=True), s
+            note_id, folder_id, note.model_dump(exclude_unset=True), s
         )
     )
+
+
+@router.post(
+    "/{folder_id}/notes/{note_id}/images",
+    description="Uploads an image from a given Note in a given Folder",
+    response_model=note_schemas.ImageUpload,
+)
+async def upload_image(
+    folder_id: str,
+    note_id: str,
+    image_file: "UploadFile" = File(...),
+    auth_user: "AuthUser" = Depends(get_auth_user),
+    session: "Session" = Depends(get_session),
+) -> "note_schemas.ImageUpload":
+    if not await services.get_user_folder(
+        auth_user.user_id, folder_id, session
+    ) or not await note_services.get_folder_note(note_id, folder_id, session):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
+    upload_path = await upload(auth_user.user_id, image_file)
+    return {"path": upload_path}
 
 
 @router.delete(
@@ -147,4 +177,6 @@ async def delete_note(
     if not await services.get_user_folder(auth_user.user_id, folder_id, session):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
-    await session.with_transaction(lambda s: note_services.delete_note(note_id, s))
+    await session.with_transaction(
+        lambda s: note_services.delete_note(note_id, folder_id, s)
+    )
